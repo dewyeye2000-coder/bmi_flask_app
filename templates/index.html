@@ -47,6 +47,17 @@
             border-radius: 8px;
             color: #b00020;
         }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 6px 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
     </style>
 </head>
 <body>
@@ -70,6 +81,26 @@
         <p>BMI 지수: <strong>{{ result.bmi }}</strong></p>
         <p>판정: <strong>{{ result.category }}</strong></p>
     </div>
+    {% endif %}
+
+    {% if history %}
+    <h2>최근 기록</h2>
+    <table>
+        <tr>
+            <th>키(cm)</th>
+            <th>몸무게(kg)</th>
+            <th>BMI</th>
+            <th>판정</th>
+        </tr>
+        {% for record in history %}
+        <tr>
+            <td>{{ record.height_cm }}</td>
+            <td>{{ record.weight_kg }}</td>
+            <td>{{ record.bmi }}</td>
+            <td>{{ record.category }}</td>
+        </tr>
+        {% endfor %}
+    </table>
     {% endif %}
 </body>
 </html>

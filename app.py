@@ -1,6 +1,16 @@
+import os
+
+from dotenv import load_dotenv
 from flask import Flask, render_template, request
+from supabase import create_client
+
+load_dotenv()
 
 app = Flask(__name__)
+
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY) if SUPABASE_URL and SUPABASE_KEY else None
 
 
 def calculate_bmi(height_cm, weight_kg):
@@ -36,10 +46,29 @@ def index():
                 bmi = calculate_bmi(height, weight)
                 category = get_bmi_category(bmi)
                 result = {"bmi": bmi, "category": category}
+
+                if supabase:
+                    supabase.table("bmi_records").insert({
+                        "height_cm": height,
+                        "weight_kg": weight,
+                        "bmi": bmi,
+                        "category": category,
+                    }).execute()
         except (ValueError, KeyError):
             error = "올바른 숫자를 입력해주세요."
 
-    return render_template("index.html", result=result, error=error)
+    history = []
+    if supabase:
+        response = (
+            supabase.table("bmi_records")
+            .select("*")
+            .order("created_at", desc=True)
+            .limit(10)
+            .execute()
+        )
+        history = response.data
+
+    return render_template("index.html", result=result, error=error, history=history)
 
 
 if __name__ == "__main__":
